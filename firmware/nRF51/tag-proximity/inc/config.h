@@ -29,7 +29,7 @@
 #define CONFIG_FLASH_LOGGING        1
 
 /* accelerometer-based sleep */
-#define CONFIG_ACCEL_SLEEP          0
+#define CONFIG_ACCEL_SLEEP          1
 
 /* blink on receiving a proximity packet */
 #define CONFIG_PROXIMITY_BLINK      0
@@ -39,6 +39,9 @@
 
 /* double blink on invalid epoch time */
 #define CONFIG_EPOCH_INVALID_BLINK  1
+
+/* Bluetooth LE log upload */
+#define CONFIG_BLE_UPLOAD           1
 
 /* every CONFIG_PROX_SPACING-RANDOM(2^CONFIG_PROX_SPACING_RNG_BITS)
  * listen for CONFIG_PROX_LISTEN - all based on LF_FREQUENCY ticks */

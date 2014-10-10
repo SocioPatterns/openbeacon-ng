@@ -34,6 +34,9 @@
 #include <log.h>
 #endif
 
+extern void ble_dump(void);
+
+
 uint8_t hibernate = 0;
 uint8_t status_flags = 0;
 uint8_t boot_count;
@@ -140,6 +143,8 @@ void main_entry(void)
 	if(acc_init())
 		halt(3);
 
+	ble_dump();
+
 	/* start radio */
 	debug_printf("\n\rInitializing Tag[%08X] v" PROGRAM_VERSION " @24%02iMHz ...\n\r",
 		tag_id,
@@ -178,6 +183,10 @@ void main_entry(void)
 				flash_log_dump();
 				flash_log_status();
 #endif /* CONFIG_FLASH_LOGGING */
+
+#if CONFIG_BLE_UPLOAD
+				ble_dump();
+#endif /* CONFIG_BLE_UPLOAD */
 			} else if (keypress_duration > 500)
 			{
 			/* short key press toggle hibernation */

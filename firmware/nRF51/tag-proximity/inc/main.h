@@ -39,4 +39,6 @@ extern void blink(uint8_t times);
 extern void blink_fast(uint8_t times);
 extern uint16_t blink_wait_release(void);
 
+extern void halt(uint8_t times);
+
 #endif/*__MAIN_H__*/

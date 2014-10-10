@@ -25,6 +25,12 @@ APP_SRC= \
   src/heatshrink_encoder.c \
   src/radio.c \
   src/timer.c \
+  src/ble_timer.c \
+  src/ble_random.c \
+  src/ble_radio.c \
+  src/ble_ll.c \
+  src/ble_bci.c \
+  src/ble.c \
   src/main.c
 
 APP_SRC+=$(IMAGES_C)

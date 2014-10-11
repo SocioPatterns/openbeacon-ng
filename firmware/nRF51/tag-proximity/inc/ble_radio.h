@@ -49,10 +49,8 @@ typedef enum radio_power {
  * of a TX/RX_NEXT flag). So, if the callback implementation wants to operate
  * the radio, it will need to first stop the radio.
  */
-//typedef void (*radio_recv_cb_t) (const uint8_t *pdu, bool crc, bool active);
-//typedef void (*radio_send_cb_t) (bool active);
-typedef void (*radio_recv_cb_t) (const uint8_t *pdu);
-typedef void (*radio_send_cb_t) (void);
+typedef void (*radio_recv_cb_t) (const uint8_t *pdu, bool crc, bool active);
+typedef void (*radio_send_cb_t) (bool active);
 
 int16_t ble_radio_init(void);
 

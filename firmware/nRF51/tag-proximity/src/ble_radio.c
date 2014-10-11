@@ -76,14 +76,14 @@ static __inline int8_t ch2freq(uint8_t ch)
 	}
 }
 
-void RADIO_IRQHandler(void)
+void RADIO_IRQ_Handler(void)
 {
 	uint8_t old_status;
-	//bool active;
+	bool active;
 
 	NRF_RADIO->EVENTS_END = 0UL;
 
-	//active = false;
+	active = false;
 	old_status = status;
 	status = STATUS_INITIALIZED;
 
@@ -91,27 +91,25 @@ void RADIO_IRQHandler(void)
 		if (flags & RADIO_FLAGS_TX_NEXT) {
 			flags &= ~RADIO_FLAGS_TX_NEXT;
 			status |= STATUS_TX;
-			//active = true;
+			active = true;
 			NRF_RADIO->PACKETPTR = (uint32_t) outbuf;
 			NRF_RADIO->SHORTS &= ~RADIO_SHORTS_DISABLED_TXEN_Msk;
 		}
 
 		if (recv_cb) {
-			//recv_cb(inbuf, NRF_RADIO->CRCSTATUS, active);
-			recv_cb(inbuf);
+			recv_cb(inbuf, NRF_RADIO->CRCSTATUS, active);
 		}
 	} else if (old_status & STATUS_TX) {
 		if (flags & RADIO_FLAGS_RX_NEXT) {
 			flags &= ~RADIO_FLAGS_RX_NEXT;
 			status |= STATUS_RX;
-			//active = true;
+			active = true;
 			NRF_RADIO->PACKETPTR = (uint32_t) inbuf;
 			NRF_RADIO->SHORTS &= ~RADIO_SHORTS_DISABLED_RXEN_Msk;
 		}
 
 		if (send_cb)
-			send_cb();
-			//send_cb(active);
+			send_cb(active);
 	}
 }
 

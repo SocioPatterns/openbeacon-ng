@@ -4,7 +4,6 @@
  *  Copyright (c) 2013 Paulo B. de Oliveira Filho <pauloborgesfilho@gmail.com>
  *  Copyright (c) 2013 Claudio Takahasi <claudio.takahasi@gmail.com>
  *  Copyright (c) 2013 João Paulo Rechi Vita <jprvita@gmail.com>
- *  Copyright (c) 2014 Ciro Cattuto <ciro.cattuto@gmail.com>
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -25,49 +24,20 @@
  *  SOFTWARE.
  */
 
-#include <openbeacon.h>
-#include <ble.h>
-#include <ble_random.h>
-#include <ble_timer.h>
-#include <ble_radio.h>
-#include <ble_events.h>
-#include <ble_ll.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
 
+#include <blessed/errcodes.h>
+#include <blessed/log.h>
+#include <blessed/bdaddr.h>
+#include <blessed/random.h>
+#include <blessed/events.h>
 
-/* -------- ll-plat.c ---------- */
-static adv_report_cb_t adv_report_cb = NULL;
-static struct adv_report *adv_report = NULL;
-
-void SWI0_IRQ_Handler(void)
-{
-	if (adv_report_cb)
-		adv_report_cb(adv_report);
-}
-
-int16_t ll_plat_send_adv_report(adv_report_cb_t cb, struct adv_report *rpt)
-{
-	if (!cb || !rpt)
-		return -EINVAL;
-
-	adv_report_cb = cb;
-	adv_report = rpt;
-
-	NVIC_SetPendingIRQ(SWI0_IRQn);
-
-	return 0;
-}
-
-int16_t ll_plat_init(void)
-{
-	NVIC_ClearPendingIRQ(SWI0_IRQn);
-	NVIC_SetPriority(SWI0_IRQn, IRQ_PRIORITY_LOW);
-	NVIC_EnableIRQ(SWI0_IRQn);
-
-	return 0;
-}
-/* -------- ll-plat.c ---------- */
-
-
+#include "radio.h"
+#include "timer.h"
+#include "ll.h"
 
 /* Link Layer specification Section 2.1.2, Core 4.1 page 2503 */
 #define LL_ACCESS_ADDRESS_ADV		0x8E89BED6
@@ -192,7 +162,7 @@ static ll_states_t current_state;
 
 static uint8_t adv_chs[] = { 37, 38, 39 };
 static uint8_t adv_ch_idx;
-//static uint8_t prev_adv_ch_idx;
+static uint8_t prev_adv_ch_idx;
 static uint8_t adv_ch_map;
 
 /* Link Layer specification Section 1.4, Core 4.1 page 2501 */
@@ -494,7 +464,7 @@ static void adv_singleshot_cb(void)
 								LL_CRCINIT_ADV);
 	radio_send((uint8_t *) &pdu_adv, rx ? RADIO_FLAGS_RX_NEXT : 0);
 
-	//prev_adv_ch_idx = adv_ch_idx;
+	prev_adv_ch_idx = adv_ch_idx;
 	if (!inc_adv_ch_idx())
 		timer_start(t_ll_single_shot, t_adv_pdu_interval,
 							adv_singleshot_cb);
@@ -553,8 +523,8 @@ int16_t ll_advertise_start(ll_pdu_t type, uint32_t interval, uint8_t chmap)
 
 	radio_set_callbacks(recv_cb, send_cb);
 
-	//debug_printf("PDU interval %u ms, event interval %u ms\n\r",
-	//			t_adv_pdu_interval / 1000, interval / 1000);
+	DBG("PDU interval %u ms, event interval %u ms",
+				t_adv_pdu_interval / 1000, interval / 1000);
 
 	err_code = timer_start(t_ll_interval, interval, adv_interval_cb);
 	if (err_code < 0)
@@ -651,7 +621,7 @@ static void init_default_conn_params(void)
  *
  * See Link Layer specification Section 4.5, Core 4.1 pages 2537-2547
  */
-static void init_connect_req_pdu(void)
+static void init_connect_req_pdu()
 {
 	struct ll_pdu_connect_payload *payload;
 
@@ -696,7 +666,7 @@ static void init_connect_req_pdu(void)
  *
  * See Link Layer specification Section 4.5, Core 4.1 pages 2537-2547
  */
-static void init_conn_context(void)
+static void init_conn_context()
 {
 	struct ll_conn_context *context = &conn_context;
 	struct ll_pdu_connect_payload *connect_req =
@@ -731,17 +701,15 @@ int16_t ll_init(const bdaddr_t *addr)
 	if (err_code < 0)
 		return err_code;
 
-/*
 	err_code = log_init();
 	if (err_code < 0 && err_code != -EALREADY)
 		return err_code;
-*/
 
-	err_code = ble_timer_init();
+	err_code = timer_init();
 	if (err_code < 0)
 		return err_code;
 
-	err_code = ble_radio_init();
+	err_code = radio_init();
 	if (err_code < 0)
 		return err_code;
 
@@ -778,7 +746,7 @@ static void scan_radio_recv_cb(const uint8_t *pdu, bool crc, bool active)
 	radio_recv(0);
 
 	if (!ll_adv_report_cb) {
-		//ERROR("No adv. report callback defined");
+		ERROR("No adv. report callback defined");
 		return;
 	}
 
@@ -857,7 +825,7 @@ int16_t ll_scan_start(uint8_t scan_type, uint32_t interval, uint32_t window,
 	current_state = LL_STATE_SCANNING;
 	scan_interval_cb();
 
-	//DBG("interval %uus, window %uus", interval, window);
+	DBG("interval %uus, window %uus", interval, window);
 
 	return 0;
 }
@@ -884,7 +852,7 @@ int16_t ll_scan_stop(void)
 
 	current_state = LL_STATE_STANDBY;
 
-	//DBG("");
+	DBG("");
 
 	return 0;
 }
@@ -896,12 +864,12 @@ int16_t ll_scan_stop(void)
 int16_t ll_set_conn_params(ll_conn_params_t* conn_params)
 {
 	if (conn_params->conn_interval_max < conn_params->conn_interval_min) {
-		//ERROR("Min conn. interval must be lower than max interval");
+		ERROR("Min conn. interval must be lower than max interval");
 		return -EINVAL;
 	}
 
 	if (conn_params->maximum_ce_length < conn_params->minimum_ce_length) {
-		//ERROR("Min CE length must be lower than max CE length");
+		ERROR("Min CE length must be lower than max CE length");
 		return -EINVAL;
 	}
 
@@ -935,7 +903,7 @@ int16_t ll_set_data_ch_map(uint64_t ch_map)
 	}
 
 	if (data_ch_map.cnt < 2) {
-		//ERROR("Invalid channel map : 0x%10x", ch_map);
+		ERROR("Invalid channel map : 0x%10x", ch_map);
 		return -EINVAL;
 	}
 
@@ -963,7 +931,7 @@ static void conn_master_radio_recv_cb(const uint8_t *pdu, bool crc, bool active)
 	if (!crc) {
 		/* ignore incoming data
 		 * equivalent to a NACK => resend the old data */
-		//DBG("Packet with bad CRC received");
+		DBG("Packet with bad CRC received");
 		return;
 	}
 
@@ -993,7 +961,7 @@ static void conn_master_radio_recv_cb(const uint8_t *pdu, bool crc, bool active)
 
 	if (rcvd_pdu->nesn == (conn_context.sn & 0x01)) {
 		/* NACK => resend old data (do nothing) */
-		//DBG("NACK received");
+		DBG("NACK received");
 	}
 	else {
 		/* ACK => send new data */
@@ -1089,7 +1057,8 @@ static void init_radio_recv_cb(const uint8_t *pdu, bool crc, bool active)
 					ll_conn_params.conn_interval_min*1250,
 						conn_master_interval_cb);
 
-		radio_set_callbacks(conn_master_radio_recv_cb, conn_master_radio_send_cb);
+		radio_set_callbacks(conn_master_radio_recv_cb,
+						conn_master_radio_send_cb);
 
 		/* Prepare the Data PDU that will be sent */
 		prepare_next_data_pdu(false, 0x00);
@@ -1150,12 +1119,12 @@ int16_t ll_conn_create(uint32_t interval, uint32_t window,
 		return -ENOREADY;
 
 	if (window > interval) {
-		//ERROR("interval must be greater than window");
+		ERROR("interval must be greater than window");
 		return -EINVAL;
 	}
 
 	if (peer_addresses == NULL || num_addresses == 0) {
-		//ERROR("at least one peer address must be specified");
+		ERROR("at least one peer address must be specified");
 		return -EINVAL;
 	}
 
@@ -1180,7 +1149,7 @@ int16_t ll_conn_create(uint32_t interval, uint32_t window,
 	current_state = LL_STATE_INITIATING;
 	init_interval_cb();
 
-	//DBG("interval %uus, window %uus", interval, window);
+	DBG("interval %uus, window %uus", interval, window);
 
 	return 0;
 }
@@ -1200,7 +1169,7 @@ int16_t ll_conn_cancel(void)
 
 	current_state = LL_STATE_STANDBY;
 
-	//DBG("");
+	DBG("");
 
 	return 0;
 }
@@ -1230,8 +1199,8 @@ int16_t ll_conn_terminate(void)
 int16_t ll_conn_send(uint8_t *data, uint8_t len)
 {
 	if (len > LL_DATA_MTU_PAYLOAD) {
-		//ERROR("Max payload length : %u bytes in connection state",
-		//					LL_DATA_MTU_PAYLOAD);
+		ERROR("Max payload length : %u bytes in connection state",
+							LL_DATA_MTU_PAYLOAD);
 		return -EINVAL;
 	}
 

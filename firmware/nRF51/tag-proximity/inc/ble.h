@@ -54,4 +54,12 @@ typedef struct bdaddr {
 		status = bci_init(&addr);           \
 	} while (0)
 
+/* Reasons for disconnection
+ * Error codes, Section 1.3, Core 4.1 p. 666 */
+#define	BLE_HCI_CONNECTION_TIMEOUT   				0x08
+#define BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION   		0x13
+#define	BLE_HCI_REMOTE_DEV_TERMINATION_DUE_TO_LOW_RESOURCES	0x14
+#define BLE_HCI_REMOTE_DEV_TERMINATION_DUE_TO_POWER_OFF		0x15
+#define	BLE_HCI_LOCAL_HOST_TERMINATED_CONNECTION		0x16
+
 #endif /* __BLE_H__ */

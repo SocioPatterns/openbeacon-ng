@@ -34,7 +34,6 @@ CFLAGS= \
 -I$(CORE)startup/inc \
 -I$(CORE)openbeacon/inc \
 -Wall \
--Werror \
 -Wextra  \
 -Wno-multichar \
 -Wstrict-prototypes  \

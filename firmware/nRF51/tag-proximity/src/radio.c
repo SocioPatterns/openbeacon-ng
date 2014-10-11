@@ -328,6 +328,7 @@ static void radio_on_prox_packet(uint16_t delta_t)
 }
 
 
+#if 0
 void RADIO_IRQ_Handler(void)
 {
 	uint32_t ticks;
@@ -548,7 +549,7 @@ void RADIO_IRQ_Handler(void)
 		NRF_RADIO->EVENTS_PAYLOAD = 0;
 	}
 }
-
+#endif 
 
 void radio_init(uint32_t uid)
 {

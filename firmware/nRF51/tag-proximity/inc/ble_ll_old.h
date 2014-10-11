@@ -4,6 +4,7 @@
  *  Copyright (c) 2013 Paulo B. de Oliveira Filho <pauloborgesfilho@gmail.com>
  *  Copyright (c) 2013 Claudio Takahasi <claudio.takahasi@gmail.com>
  *  Copyright (c) 2013 João Paulo Rechi Vita <jprvita@gmail.com>
+ *  Copyright (c) 2014 Ciro Cattuto <ciro.cattuto@gmail.com>
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -24,11 +25,6 @@
  *  SOFTWARE.
  */
 
-#ifndef __BLE_LL_H__
-#define __BLE_LL_H__
-
-#include <ble_events.h>
-
 /* Link Layer specification Section 2.1, Core 4.1 page 2503 */
 #define LL_MTU				39
 
@@ -42,13 +38,6 @@
 
 /* Link Layer specification Section 2.3.1, Core 4.1 page 2506 */
 #define LL_ADV_MTU_DATA			(LL_ADV_MTU_PAYLOAD - BDADDR_LEN)
-
-/* Link Layer specification Section 2.4, Core 4.1 page 2511 */
-#define LL_DATA_MIC_LEN			4
-
-/* Link Layer specification Section 2.4, Core 4.1 page 2511 */
-#define LL_DATA_MTU_PAYLOAD		(LL_MTU - LL_HEADER_LEN - \
-							LL_DATA_MIC_LEN)
 
 /* Link Layer specification Section 4.4.2.2, Core 4.1 page 2528 */
 #define LL_ADV_INTERVAL_MIN_CONN	20000		/* 20 ms */
@@ -75,14 +64,6 @@
 #define LL_SCAN_PASSIVE			0x00
 #define LL_SCAN_ACTIVE			0x01
 
-/* Values used for LL Version exchange.
- * https://www.bluetooth.org/en-us/specification/assigned-numbers/link-layer
- * https://www.bluetooth.org/en-us/specification/assigned-numbers/company-identifiers
- */
-#define LL_VERS_NR			0x07 	/* Core v4.1 */
-#define LL_COMP_ID			0xFFFF 	/* Unassigned Company ID */
-#define LL_SUB_VERS_NR			0x0000	/* Implementation rev. nr */
-
 /* Link Layer specification Section 2.3, Core 4.1 page 2505 */
 typedef enum ll_pdu {
 	LL_PDU_ADV_IND,
@@ -93,30 +74,6 @@ typedef enum ll_pdu {
 	LL_PDU_CONNECT_REQ,
 	LL_PDU_ADV_SCAN_IND
 } ll_pdu_t;
-
-/* Link Layer specification, Section 2.4.2, Core 4.1 p. 2512-2521 */
-typedef enum ll_ctrl_pdu {
-	LL_CONNECTION_UPDATE_REQ,
-	LL_CHANNEL_MAP_REQ,
-	LL_TERMINATE_IND,
-	LL_ENC_REQ,
-	LL_ENC_RSP,
-	LL_START_ENC_REQ,
-	LL_START_ENC_RSP,
-	LL_UNKNOWN_RSP,
-	LL_FEATURE_REQ,
-	LL_FEATURE_RSP,
-	LL_PAUSE_ENC_REQ,
-	LL_PAUSE_ENC_RSP,
-	LL_VERSION_IND,
-	LL_REJECT_IND,
-	LL_SLAVE_FEATURE_REQ,
-	LL_CONNECTION_PARAM_REQ,
-	LL_CONNECTION_PARAM_RSP,
-	LL_REJECT_IND_EXT,
-	LL_PING_REQ,
-	LL_PING_RSP
-} ll_ctrl_pdu_t;
 
 /**@brief Connection parameters structure */
 /* TODO helper macros to convert to and from us */
@@ -146,9 +103,6 @@ struct adv_report {
  * See HCI Funcional Specification Section 7.7.65.2, Core 4.1 page 1220 */
 typedef void (*adv_report_cb_t)(struct adv_report *report);
 
-/* Callback function for connection events */
-typedef void (*conn_evt_cb_t)(ble_evt_t type, const void *data);
-
 int16_t ll_init(const bdaddr_t *addr);
 
 /* Advertising */
@@ -166,15 +120,10 @@ int16_t ll_scan_stop(void);
 int16_t ll_set_conn_params(ll_conn_params_t* conn_params);
 int16_t ll_set_data_ch_map(uint64_t ch_map);
 int16_t ll_conn_create(uint32_t interval, uint32_t window,
-	bdaddr_t* peer_addresses, uint16_t num_addresses, uint8_t* rx_buf,
-						conn_evt_cb_t conn_evt_cb);
+			bdaddr_t* peer_addresses, uint16_t num_addresses);
 int16_t ll_conn_cancel(void);
-int16_t ll_conn_terminate(void);
-int16_t ll_conn_send(uint8_t *data, uint8_t len);
 
 /* LL "platform" interface */
 int16_t ll_plat_init(void);
 int16_t ll_plat_send_adv_report(adv_report_cb_t cb, struct adv_report *rpt);
-
-#endif /* __BLE_LL_H__ */
 

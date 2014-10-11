@@ -35,6 +35,8 @@ int16_t random_init(void)
 	NRF_RNG->SHORTS = RNG_SHORTS_VALRDY_STOP_Enabled <<
 						RNG_SHORTS_VALRDY_STOP_Pos;
 
+	debug_printf("rng initialized\n\r");
+
 	return 0;
 }
 

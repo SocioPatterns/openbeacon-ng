@@ -342,6 +342,8 @@ int16_t ble_radio_init(void)
 
 	status = STATUS_INITIALIZED;
 
+	debug_printf("Radio initialized\n\r");
+
 	return 0;
 }
 

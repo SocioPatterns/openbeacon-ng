@@ -95,7 +95,7 @@ static __inline void update_cc(uint8_t id, uint32_t ticks)
 	NRF_TIMER0->INTENSET = set_mask;
 }
 
-void TIMER0_IRQHandler(void)
+void TIMER0_IRQ_Handler(void)
 {
 	uint32_t curr = get_curr_ticks();
 	uint8_t id_mask = 0;
@@ -130,6 +130,7 @@ void TIMER0_IRQHandler(void)
 	}
 }
 
+
 int16_t ble_timer_init(void)
 {
 	if (NRF_CLOCK->EVENTS_HFCLKSTARTED == 0UL) {
@@ -140,17 +141,22 @@ int16_t ble_timer_init(void)
 	NRF_TIMER0->MODE = TIMER_MODE_MODE_Timer;
 	NRF_TIMER0->BITMODE = TIMER_BITMODE_BITMODE_24Bit;
 	NRF_TIMER0->PRESCALER = TIMER_PRESCALER;
+	NRF_TIMER0->TASKS_STOP = 1;
+	NRF_TIMER0->TASKS_CLEAR = 1;
 
-	NRF_TIMER0->INTENCLR = TIMER_INTENCLR_COMPARE0_Msk
-						| TIMER_INTENCLR_COMPARE1_Msk
-						| TIMER_INTENCLR_COMPARE2_Msk
-						| TIMER_INTENCLR_COMPARE3_Msk;
+	NRF_TIMER0->INTENCLR =
+		(TIMER_INTENCLR_COMPARE0_Clear << TIMER_INTENCLR_COMPARE0_Pos) |
+		(TIMER_INTENCLR_COMPARE1_Clear << TIMER_INTENCLR_COMPARE1_Pos) |
+		(TIMER_INTENCLR_COMPARE2_Clear << TIMER_INTENCLR_COMPARE2_Pos) |
+		(TIMER_INTENCLR_COMPARE3_Clear << TIMER_INTENSET_COMPARE3_Pos);
 
 	NVIC_SetPriority(TIMER0_IRQn, IRQ_PRIORITY_HIGH);
 	NVIC_ClearPendingIRQ(TIMER0_IRQn);
 	NVIC_EnableIRQ(TIMER0_IRQn);
 
 	memset(timers, 0, sizeof(timers));
+
+	debug_printf("timer started\n\r");
 
 	return 0;
 }

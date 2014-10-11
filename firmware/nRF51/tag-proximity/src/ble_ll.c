@@ -134,7 +134,7 @@ static ll_states_t current_state;
 
 static uint8_t adv_chs[] = { 37, 38, 39 };
 static uint8_t adv_ch_idx;
-static uint8_t prev_adv_ch_idx;
+//static uint8_t prev_adv_ch_idx;
 static uint8_t adv_ch_map;
 
 /* Link Layer specification Section 1.4, Core 4.1 page 2501 */
@@ -299,7 +299,7 @@ static void adv_singleshot_cb(void)
 								LL_CRCINIT_ADV);
 	radio_send((uint8_t *) &pdu_adv, rx ? RADIO_FLAGS_RX_NEXT : 0);
 
-	prev_adv_ch_idx = adv_ch_idx;
+	//prev_adv_ch_idx = adv_ch_idx;
 	if (!inc_adv_ch_idx())
 		timer_start(t_ll_single_shot, t_adv_pdu_interval,
 							adv_singleshot_cb);
@@ -358,7 +358,7 @@ int16_t ll_advertise_start(ll_pdu_t type, uint32_t interval, uint8_t chmap)
 
 	radio_set_callbacks(recv_cb, send_cb);
 
-	//DBG("PDU interval %u ms, event interval %u ms",
+	//debug_printf("PDU interval %u ms, event interval %u ms\n\r",
 	//			t_adv_pdu_interval / 1000, interval / 1000);
 
 	err_code = timer_start(t_ll_interval, interval, adv_interval_cb);

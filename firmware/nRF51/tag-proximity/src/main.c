@@ -125,6 +125,12 @@ void main_entry(void)
 	/* initialize UART */
 	uart_init();
 
+	/* === BLE TEST === */
+	ble_dump();
+	//debug_printf("SHOULD NOT BE HERE\n\r");
+	//halt(0);
+	/* ================ */
+
 	/* start timer */
 	timer_init();
 
@@ -142,8 +148,6 @@ void main_entry(void)
 	/* initialize accelerometer */
 	if(acc_init())
 		halt(3);
-
-	ble_dump();
 
 	/* start radio */
 	debug_printf("\n\rInitializing Tag[%08X] v" PROGRAM_VERSION " @24%02iMHz ...\n\r",

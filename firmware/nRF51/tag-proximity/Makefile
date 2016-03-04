@@ -53,4 +53,8 @@ set_time: $(TARGET).elf
 	CTIME_HEX=`printf "%x\n" $$CTIME`; \
 	echo w4 $$G_TIME_ADDR $$CTIME_HEX "\n" exit | $(JLINK)
 
+wakeup: $(TARGET).elf
+	HIBERNATE_ADDR=`$(NM) -C $(TARGET).elf | awk '{if ($$3 == "hibernate") print $$1;}'`; \
+	echo w1 $$HIBERNATE_ADDR 0 "\n" exit | $(JLINK)
+
 include ../core/Makefile.rules

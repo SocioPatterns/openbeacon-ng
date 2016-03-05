@@ -41,6 +41,8 @@ uint8_t boot_count;
 uint32_t reset_reason;
 uint8_t uart_enabled = 0;
 
+static uint8_t uart_line_buf[UART_LINE_BUF_SIZE];
+uint8_t uart_recv_len, uart_line_buf_len;
 
 void blink(uint8_t times)
 {
@@ -89,6 +91,28 @@ void halt(uint8_t times)
 		blink(times);
 		timer_wait(SECONDS(3));
 	}
+}
+
+int parse_command(const char *cmd)
+{
+	//debug_printf("\n\rcommand: %s\n\r", cmd);
+
+ if (strcmp(cmd, "flash_dump") == 0) {
+	 if (!hibernate)
+	 {
+		 flash_log_flush();
+		 hibernate = 1;
+   }
+	 flash_log_dump();
+	 flash_log_status();
+	 return 0;
+ } else if (strcmp(cmd, "flash_status") == 0)
+ {
+	 flash_log_status();
+	 return 0;
+ }
+
+	return 1;
 }
 
 void main_entry(void)
@@ -187,7 +211,7 @@ void main_entry(void)
 #endif /* CONFIG_FLASH_LOGGING */
 			} else if (keypress_duration > 500)
 			{
-			/* short key press toggle hibernation */
+			/* short key press toggles hibernation */
 				hibernate ^= 1;
 
 #if CONFIG_FLASH_LOGGING
@@ -199,6 +223,26 @@ void main_entry(void)
 				blink_fast(hibernate ? 3 : 6);
 				if (uart_enabled)
 					debug_printf("\n\rhibernate -> %i", hibernate);
+			}
+		}
+
+		if (uart_enabled)
+		{
+			uart_recv_len = uart_rx(uart_line_buf+uart_line_buf_len, UART_LINE_BUF_SIZE-uart_line_buf_len-2);
+
+			if (uart_recv_len)
+			{
+					uart_line_buf_len += uart_recv_len;
+
+					if (uart_line_buf[uart_line_buf_len-1] == '\n' ||
+							uart_line_buf[uart_line_buf_len-1] == '\r' )
+					{
+							uart_line_buf[uart_line_buf_len-1] = 0;
+							//debug_printf("\n\rcommand: %s\n\r", uart_line_buf);
+							parse_command((const char *) uart_line_buf);
+							uart_line_buf_len = 0;
+					}
+
 			}
 		}
 

@@ -49,6 +49,8 @@
 /* fast 1 Mbps UART data transfer vs standard 115200 bps speed */
 #define CONFIG_UART_FAST	0
 
+#define CONFIG_UART_RX  1
+
 
 /* every CONFIG_PROX_SPACING-RANDOM(2^CONFIG_PROX_SPACING_RNG_BITS)
  * listen for CONFIG_PROX_LISTEN - all based on LF_FREQUENCY ticks */
@@ -63,6 +65,8 @@
 #else
 #define CONFIG_UART_BAUDRATE UART_BAUDRATE_BAUDRATE_Baud115200
 #endif
+
+#define UART_LINE_BUF_SIZE  128
 
 #define CONFIG_UART_FORCE_POWERED 1
 

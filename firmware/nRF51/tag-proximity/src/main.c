@@ -98,21 +98,30 @@ int parse_command(const char *cmd)
 	//debug_printf("\n\rcommand: %s\n\r", cmd);
 
  if (strcmp(cmd, "flash_dump") == 0) {
-	 if (!hibernate)
-	 {
+	if (!hibernate) {
 		 hibernate = 1;
-
 		 flash_log_flush();
-   }
-	 flash_log_dump();
-	 flash_log_status();
-	 return 0;
+	}
+	flash_log_dump();
+	flash_log_status();
+	return 0;
  } else if (strcmp(cmd, "flash_status") == 0)
  {
 	 flash_log_status();
 	 return 0;
+ } else if (strcmp(cmd, "flash_erase") == 0)
+ {
+ 	if (!hibernate) {
+		 hibernate = 1;
+		 flash_log_flush();
+	}
+ 	flash_wakeup();
+ 	flash_erase_chip();
+	flash_wait_ready(1);
+	flash_sleep_deep();
+	flash_log_status();
+	return 0;
  }
-
 	return 1;
 }
 

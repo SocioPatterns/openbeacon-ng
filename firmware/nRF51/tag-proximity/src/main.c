@@ -100,8 +100,9 @@ int parse_command(const char *cmd)
  if (strcmp(cmd, "flash_dump") == 0) {
 	 if (!hibernate)
 	 {
-		 flash_log_flush();
 		 hibernate = 1;
+
+		 flash_log_flush();
    }
 	 flash_log_dump();
 	 flash_log_status();

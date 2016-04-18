@@ -34,7 +34,7 @@
 #endif
 
 #ifdef CONFIG_UART_BAUDRATE
-extern void uart_init(void);
+extern void uart_init(int uart_enable);
 extern BOOL uart_tx(uint8_t data);
 extern int uart_rx(uint8_t *data, int len);
 #endif

@@ -160,7 +160,7 @@ void main_entry(void)
 	nrf_gpio_cfg_input(CONFIG_SWITCH_PIN, NRF_GPIO_PIN_NOPULL);
 
 	/* initialize UART */
-	uart_init();
+	uart_init(uart_enabled);
 
 	/* start timer */
 	timer_init();

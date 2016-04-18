@@ -42,7 +42,7 @@ static volatile uint16_t g_uart_rxbuffer_count;
 BOOL default_putchar (uint8_t data) ALIAS(uart_tx);
 
 
-void uart_init(void)
+void uart_init(int uart_enable)
 {
 
 #ifdef  CONFIG_UART_TXD_PIN
@@ -97,14 +97,19 @@ void uart_init(void)
 	/* start UART */
 
 #if CONFIG_UART_FORCE_POWERED || defined(CONFIG_UART_RXD_PIN)
-	NRF_UART0->ENABLE = (UART_ENABLE_ENABLE_Enabled << UART_ENABLE_ENABLE_Pos);
+	if (uart_enable)
+		NRF_UART0->ENABLE = (UART_ENABLE_ENABLE_Enabled << UART_ENABLE_ENABLE_Pos);
+	else
+		NRF_UART0->ENABLE = 0;
 #else
 	NRF_UART0->ENABLE = 0;
 #endif
 
 #ifdef CONFIG_UART_RXD_PIN
+if (uart_enable) {
 	NRF_UART0->TASKS_STARTRX = 1;
 	NRF_UART0->EVENTS_RXDRDY = 0;
+}
 #endif
 }
 

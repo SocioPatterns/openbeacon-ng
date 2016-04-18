@@ -48,8 +48,8 @@ static uint32_t prox_txpower_sequence[] = {
 	RADIO_TXPOWER_TXPOWER_Neg20dBm,
 	RADIO_TXPOWER_TXPOWER_Neg20dBm,
 	RADIO_TXPOWER_TXPOWER_Neg20dBm,
-	RADIO_TXPOWER_TXPOWER_Neg12dBm,
-	RADIO_TXPOWER_TXPOWER_Neg4dBm
+	RADIO_TXPOWER_TXPOWER_Neg16dBm,
+	RADIO_TXPOWER_TXPOWER_Neg16dBm
 };
 #define PROX_TXPOWER_SEQUENCE_LENGTH (sizeof(prox_txpower_sequence) / sizeof(uint32_t))
 

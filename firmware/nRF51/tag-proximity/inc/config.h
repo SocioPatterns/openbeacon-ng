@@ -49,7 +49,7 @@
 /* fast 1 Mbps UART data transfer vs standard 115200 bps speed */
 #define CONFIG_UART_FAST	0
 
-#define CONFIG_UART_RX  1
+#define CONFIG_UART_RX		1
 
 
 /* every CONFIG_PROX_SPACING-RANDOM(2^CONFIG_PROX_SPACING_RNG_BITS)

@@ -57,4 +57,7 @@ wakeup: $(TARGET).elf
 	HIBERNATE_ADDR=`$(NM) -C $(TARGET).elf | awk '{if ($$3 == "hibernate") print $$1;}'`; \
 	echo w1 $$HIBERNATE_ADDR 0 "\n" exit | $(JLINK)
 
+reboot:
+	echo w4 40000544 1 "\n" si 0 "\n" tck0 "\n" t0 "\n" sleep 10 "\n" t1 "\n" exit | $(JLINK)
+
 include ../core/Makefile.rules

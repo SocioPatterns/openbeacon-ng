@@ -51,13 +51,13 @@ set_time: $(TARGET).elf
 	G_TIME_ADDR=`$(NM) -C $(TARGET).elf | awk '{if ($$3 == "g_time") print $$1;}'`; \
 	CTIME=`date +%s`; \
 	CTIME_HEX=`printf "%x\n" $$CTIME`; \
-	echo w4 $$G_TIME_ADDR $$CTIME_HEX "\n" exit | $(JLINK)
+	printf "w4 %s %s\nexit" $$G_TIME_ADDR $$CTIME_HEX | $(JLINK)
 
 wakeup: $(TARGET).elf
 	HIBERNATE_ADDR=`$(NM) -C $(TARGET).elf | awk '{if ($$3 == "hibernate") print $$1;}'`; \
-	echo w1 $$HIBERNATE_ADDR 0 "\n" exit | $(JLINK)
+	printf "w1 %s 0\nexit" $$HIBERNATE_ADDR | $(JLINK)
 
 reboot:
-	echo w4 40000544 1 "\n" r "\n" exit | $(JLINK)
+	printf "w4 40000544 1\nr\nexit" | $(JLINK)
 
 include ../core/Makefile.rules

@@ -97,6 +97,7 @@ int parse_command(const char *cmd)
 {
 	//debug_printf("\n\rcommand: %s\n\r", cmd);
 
+#if CONFIG_FLASH_LOGGING
  if (strcmp(cmd, "flash_dump") == 0) {
 	if (!hibernate) {
 		 hibernate = 1;
@@ -122,6 +123,13 @@ int parse_command(const char *cmd)
 	flash_log_status();
 	return 0;
  }
+#endif
+
+ if (strcmp(cmd, "nop") == 0)
+ {
+    return 0;
+ }
+
 	return 1;
 }
 
